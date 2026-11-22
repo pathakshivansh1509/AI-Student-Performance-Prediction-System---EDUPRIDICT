@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EduPredict AI | Student Performance</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='css/style.css') }}">
+
+    <style>
+        html { scroll-behavior: smooth; scroll-padding-top: 24px; }
+
+        .content section, .content .panel, .dashboard-grid {
+            scroll-margin-top: 24px;
+        }
+
+        .analytics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 18px;
+            margin-bottom: 24px;
+        }
+
+        .analytics-card {
+            padding: 22px;
+            border: 1px solid rgba(140, 150, 190, .2);
+            border-radius: 16px;
+            background: var(--card-bg, #111827);
+            min-width: 0;
+        }
+
+        .analytics-card span {
+            display: block;
+            font-size: 13px;
+            opacity: .75;
+            margin-bottom: 12px;
+        }
+
+        .analytics-card strong {
+            display: block;
+            font-size: 28px;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+        }
+
+        .analytics-columns {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+
+        .analytics-panel {
+            padding: 24px;
+            border: 1px solid rgba(140, 150, 190, .2);
+            border-radius: 16px;
+            background: var(--card-bg, #111827);
+            min-width: 0;
+        }
+
+        .analytics-panel h3 {
+            margin: 0 0 8px;
+        }
+
+        .analytics-panel p {
+            opacity: .7;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .bar-row {
+            display: grid;
+            grid-template-columns: minmax(80px, 120px) 1fr 55px;
+            gap: 10px;
+            align-items: center;
+            margin: 17px 0;
+            font-size: 13px;
+        }
+
+        .bar-track {
+            height: 10px;
+            border-radius: 20px;
+            overflow: hidden;
+            background: rgba(140, 150, 190, .15);
+        }
+
+        .bar-fill {
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: linear-gradient(90deg, #7865ed, #39c6e6);
+            transition: width .4s ease;
+        }
+
+        .analytics-table-wrap { overflow-x: auto; }
+
+        .analytics-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .analytics-table th,
+        .analytics-table td {
+            padding: 12px;
+            border-bottom: 1px solid rgba(140, 150, 190, .18);
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        .analytics-table th { opacity: .75; }
+
+        .analytics-message {
+            font-size: 13px;
+            opacity: .7;
+            padding: 10px 0;
+        }
+
+        .analytics-refresh {
+            cursor: pointer;
+            padding: 9px 14px;
+            border-radius: 8px;
+            border: 1px solid rgba(140, 150, 190, .3);
+            background: transparent;
+            color: inherit;
+        }
+
+        .section-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin: 30px 0 18px;
+        }
+
+        @media (max-width: 1000px) {
+            .analytics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .analytics-columns { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 520px) {
+            .analytics-grid { grid-template-columns: 1fr; }
+            .bar-row { grid-template-columns: 90px 1fr 45px; }
+        }
+    </style>
+</head>
+
+<body>
+
+<aside class="sidebar">
+    <div class="brand">
+        <div class="brand-icon"><i data-lucide="graduation-cap"></i></div>
+        <div class="brand-text">
+            <h2>EduPredict</h2>
+            <span>AI ANALYTICS</span>
+        </div>
+    </div>
+
+    <nav class="navigation">
+        <p class="nav-title">MAIN</p>
+
+        <a href="#dashboard" class="nav-item active">
+            <i data-lucide="layout-dashboard"></i>
+            <span>Dashboard</span>
+        </a>
+
+        <a href="#prediction" class="nav-item">
+            <i data-lucide="brain"></i>
+            <span>Prediction</span>
+        </a>
+
+        <a href="#analytics" class="nav-item">
+            <i data-lucide="chart-no-axes-column"></i>
+            <span>Analytics</span>
+        </a>
+
+        <a href="#history" class="nav-item">
+            <i data-lucide="history"></i>
+            <span>History</span>
+        </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+        <div class="model-status">
+            <div class="status-dot"></div>
+            <div>
+                <strong>ML Model Active</strong>
+                <small>Random Forest</small>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<main class="main" id="dashboard">
+
+    <header class="topbar">
+        <button class="mobile-menu" type="button" aria-label="Open menu">
+            <i data-lucide="menu"></i>
+        </button>
+
+        <div class="page-title">
+            <span>AI PERFORMANCE SYSTEM</span>
+            <h1>Student Performance Prediction</h1>
+        </div>
+    </header>
+
+    <section class="content">
+
+        <div class="welcome-card">
+            <div class="welcome-content">
+                <span class="welcome-label">
+                    <i data-lucide="sparkles"></i>
+                    AI POWERED ANALYSIS
+                </span>
+
+                <h2>Predict academic performance</h2>
+                <p>
+                    Enter student academic and study-related information
+                    to generate a predicted final score.
+                </p>
+            </div>
+        </div>
+
+        <!-- DASHBOARD STATISTICS -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-content">
+                    <span>ML Algorithm</span>
+                    <strong>Random Forest</strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-content">
+                    <span>Model R² Score</span>
+                    <strong id="dashboardR2">
+                        {{ "%.2f"|format(metrics.r2_percentage) }}%
+                    </strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-content">
+                    <span>Training Samples</span>
+                    <strong>{{ "{:,}".format(metrics.training_samples) }}</strong>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-content">
+                    <span>Prediction Status</span>
+                    <strong class="online">Online</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- PREDICTION SECTION -->
+        <div class="dashboard-grid" id="prediction">
+
+            <div class="panel prediction-panel">
+                <div class="panel-header">
+                    <div>
+                        <span class="section-tag">MACHINE LEARNING</span>
+                        <h2>Student Information</h2>
+                        <p>Enter the student's details below.</p>
+                    </div>
+                </div>
+
+                <form id="predictionForm">
+                    <div class="form-grid">
+
+                        <div class="input-group">
+                            <label>Study Hours <span>hours/day</span></label>
+                            <div class="input-wrapper">
+                                <input type="number" id="studyHours"
+                                    name="study_hours" min="0" max="24"
+                                    step="0.1" placeholder="e.g. 5" required>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Attendance <span>%</span></label>
+                            <div class="input-wrapper">
+                                <input type="number" id="attendance"
+                                    name="attendance" min="0" max="100"
+                                    step="0.1" placeholder="e.g. 82" required>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Previous Exam Score <span>%</span></label>
+                            <div class="input-wrapper">
+                                <input type="number" id="previousScore"
+                                    name="previous_score" min="0" max="100"
+                                    step="0.1" placeholder="e.g. 74" required>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Assignment Score <span>%</span></label>
+                            <div class="input-wrapper">
+                                <input type="number" id="assignmentScore"
+                                    name="assignment_score" min="0" max="100"
+                                    step="0.1" placeholder="e.g. 80" required>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Internal Score <span>%</span></label>
+                            <div class="input-wrapper">
+                                <input type="number" id="internalScore"
+                                    name="internal_score" min="0" max="100"
+                                    step="0.1" placeholder="e.g. 68" required>
+                            </div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Sleep Hours <span>hours/day</span></label>
+                            <div class="input-wrapper">
+                                <input type="number" id="sleepHours"
+                                    name="sleep_hours" min="0" max="24"
+                                    step="0.1" placeholder="e.g. 7" required>
+                            </div>
+                        </div>
+
+                        <div class="input-group full">
+                            <label>Previous Backlogs <span>count</span></label>
+                            <div class="input-wrapper">
+                                <input type="number" id="backlogs"
+                                    name="backlogs" min="0" max="20"
+                                    step="1" placeholder="e.g. 0" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="predict-btn">
+                        <span>Predict Performance</span>
+                        <i data-lucide="arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- PREDICTION RESULT -->
+            <div class="panel result-panel">
+                <div class="panel-header">
+                    <div>
+                        <span class="section-tag">AI PREDICTION</span>
+                        <h2>Prediction Result</h2>
+                    </div>
+                </div>
+
+                <div class="result-placeholder" id="resultPlaceholder">
+                    <div class="placeholder-icon">
+                        <i data-lucide="brain"></i>
+                    </div>
+                    <h3>Ready for prediction</h3>
+                    <p>Enter student details and click Predict Performance.</p>
+                </div>
+
+                <div class="result-content hidden" id="resultContent">
+                    <div class="score-circle">
+                        <div>
+                            <strong id="predictionScore">--</strong>
+                            <span>%</span>
+                        </div>
+                    </div>
+
+                    <div class="performance-label">
+                        <span>Predicted Performance</span>
+                        <h3 id="performanceCategory">--</h3>
+                    </div>
+
+                    <div class="model-result-info">
+                        <div class="result-stat">
+                            <span>Model R²</span>
+                            <strong id="modelR2">
+                                {{ "%.2f"|format(metrics.r2_percentage) }}%
+                            </strong>
+                        </div>
+                        <div class="result-stat">
+                            <span>MAE</span>
+                            <strong id="modelMAE">{{ "%.2f"|format(metrics.mae) }}</strong>
+                        </div>
+                        <div class="result-stat">
+                            <span>RMSE</span>
+                            <strong id="modelRMSE">{{ "%.2f"|format(metrics.rmse) }}</strong>
+                        </div>
+                    </div>
+
+                    <div class="ai-insight">
+                        <strong>AI Insight</strong>
+                        <p id="aiInsight">Prediction insight will appear here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ANALYTICS DASHBOARD -->
+        <section id="analytics">
+            <div class="section-heading">
+                <div>
+                    <span class="section-tag">DATA OVERVIEW</span>
+                    <h2>Analytics Dashboard</h2>
+                    <p>Summary of recorded predictions.</p>
+                </div>
+                <button class="analytics-refresh" id="refreshAnalytics"
+                        type="button">
+                    <i data-lucide="refresh-cw"></i> Refresh
+                </button>
+            </div>
+
+            <div class="analytics-grid">
+                <div class="analytics-card">
+                    <span>Total Predictions</span>
+                    <strong id="totalPredictions">0</strong>
+                </div>
+                <div class="analytics-card">
+                    <span>Average Predicted Score</span>
+                    <strong id="averagePrediction">--</strong>
+                </div>
+                <div class="analytics-card">
+                    <span>Highest Predicted Score</span>
+                    <strong id="highestPrediction">--</strong>
+                </div>
+                <div class="analytics-card">
+                    <span>Lowest Predicted Score</span>
+                    <strong id="lowestPrediction">--</strong>
+                </div>
+            </div>
+
+            <div class="analytics-columns">
+                <div class="analytics-panel">
+                    <h3>Performance Categories</h3>
+                    <p>Distribution of recorded predictions.</p>
+                    <div id="categoryChart">
+                        <div class="analytics-message">Loading analytics...</div>
+                    </div>
+                </div>
+
+                <div class="analytics-panel">
+                    <h3>Study Hours vs Predicted Score</h3>
+                    <p>Recorded study hours and their associated predictions.</p>
+                    <div id="studyChart">
+                        <div class="analytics-message">Loading analytics...</div>
+                    </div>
+                </div>
+
+                <div class="analytics-panel">
+                    <h3>Attendance vs Predicted Score</h3>
+                    <p>Recorded attendance and predicted scores.</p>
+                    <div id="attendanceChart">
+                        <div class="analytics-message">Loading analytics...</div>
+                    </div>
+                </div>
+
+                <div class="analytics-panel">
+                    <h3>Previous Score vs Prediction</h3>
+                    <p>Previous scores and their associated predictions.</p>
+                    <div id="previousScoreChart">
+                        <div class="analytics-message">Loading analytics...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="analytics-panel">
+                <h3>Recent Prediction Trend</h3>
+                <p>Predicted scores in recorded history.</p>
+                <div class="analytics-table-wrap">
+                    <table class="analytics-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Category</th>
+                                <th>Predicted Score</th>
+                            </tr>
+                        </thead>
+                        <tbody id="predictionTrend">
+                            <tr>
+                                <td colspan="4">Loading analytics...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="analyticsMessage" class="analytics-message"></div>
+            </div>
+        </section>
+
+        <!-- FEATURE IMPORTANCE -->
+        <div class="panel feature-panel" id="features">
+            <div class="panel-header">
+                <div>
+                    <span class="section-tag">MODEL EXPLANATION</span>
+                    <h2>Performance Factors</h2>
+                    <p>Relative feature importance in the trained model.</p>
+                </div>
+            </div>
+
+            <div class="factor-grid">
+                {% for item in feature_importance %}
+                <div class="factor">
+                    <div class="factor-top">
+                        <span>
+                            {% if item.feature == "study_hours" %}Study Hours
+                            {% elif item.feature == "attendance" %}Attendance
+                            {% elif item.feature == "previous_score" %}Previous Exam Score
+                            {% elif item.feature == "assignment_score" %}Assignment Score
+                            {% elif item.feature == "internal_score" %}Internal Score
+                            {% elif item.feature == "sleep_hours" %}Sleep Hours
+                            {% elif item.feature == "backlogs" %}Previous Backlogs
+                            {% else %}{{ item.feature }}
+                            {% endif %}
+                        </span>
+                        <strong>{{ "%.2f"|format(item.importance * 100) }}%</strong>
+                    </div>
+                    <div class="factor-bar">
+                        <div class="factor-fill"
+     style="--bar-width: {{ (item.importance * 100)|round(2) }}%;"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- PREDICTION HISTORY -->
+        <div class="panel history-panel" id="history">
+            <div class="panel-header">
+                <div>
+                    <span class="section-tag">PREDICTION HISTORY</span>
+                    <h2>Recent Predictions</h2>
+                    <p>Previously generated predictions.</p>
+                </div>
+
+                <button type="button" class="outline-btn" id="clearHistoryBtn">
+                    <i data-lucide="trash-2"></i>
+                    Clear History
+                </button>
+            </div>
+
+            <div class="history-list" id="historyList">
+                <div class="history-empty">
+                    <h3>Loading history...</h3>
+                </div>
+            </div>
+        </div>
+
+    </section>
+
+    <footer>
+        <span>© 2026 EduPredict AI</span>
+        <span>Powered by Machine Learning</span>
+    </footer>
+</main>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    if (window.lucide) {
+        window.lucide.createIcons();
+    }
+
+    const $ = (id) => document.getElementById(id);
+
+    function setText(id, value) {
+        const element = $(id);
+        if (element) element.textContent = value;
+    }
+
+    function renderBars(containerId, items, labelKey, valueKey, formatter) {
+        const container = $(containerId);
+        if (!container) return;
+
+        if (!items || items.length === 0) {
+            container.innerHTML =
+                '<div class="analytics-message">No prediction data available yet.</div>';
+            return;
+        }
+
+        const values = items.map(item => Number(item[valueKey]) || 0);
+        const max = Math.max(...values, 1);
+
+        container.innerHTML = items.map(item => {
+            const value = Number(item[valueKey]) || 0;
+            const width = Math.max(0, Math.min(100, value / max * 100));
+
+            return `
+                <div class="bar-row">
+                    <span>${item[labelKey] ?? "—"}</span>
+                    <div class="bar-track">
+                        <div class="bar-fill" style="width:${width}%"></div>
+                    </div>
+                    <strong>${formatter(value)}</strong>
+                </div>
+            `;
+        }).join("");
+    }
+
+    async function loadAnalytics() {
+        setText("analyticsMessage", "Loading analytics...");
+
+        try {
+            const response = await fetch("/analytics", {
+                cache: "no-store"
+            });
+
+            if (!response.ok) {
+                throw new Error("Analytics API returned " + response.status);
+            }
+
+            const data = await response.json();
+
+            setText("totalPredictions", data.total_predictions ?? 0);
+            setText(
+                "averagePrediction",
+                data.average_prediction == null
+                    ? "--"
+                    : Number(data.average_prediction).toFixed(2)
+            );
+            setText(
+                "highestPrediction",
+                data.highest_prediction == null
+                    ? "--"
+                    : Number(data.highest_prediction).toFixed(1)
+            );
+            setText(
+                "lowestPrediction",
+                data.lowest_prediction == null
+                    ? "--"
+                    : Number(data.lowest_prediction).toFixed(1)
+            );
+
+            const categories = data.categories || {};
+            const categoryItems = Object.entries(categories).map(
+                ([category, count]) => ({
+                    category,
+                    count: Number(count) || 0
+                })
+            );
+
+            renderBars(
+                "categoryChart",
+                categoryItems,
+                "category",
+                "count",
+                value => String(value)
+            );
+
+            renderBars(
+                "studyChart",
+                data.study_vs_prediction || [],
+                "study_hours",
+                "prediction",
+                value => value.toFixed(1)
+            );
+
+            renderBars(
+                "attendanceChart",
+                data.attendance_vs_prediction || [],
+                "attendance",
+                "prediction",
+                value => value.toFixed(1)
+            );
+
+            renderBars(
+                "previousScoreChart",
+                data.previous_score_vs_prediction || [],
+                "previous_score",
+                "prediction",
+                value => value.toFixed(1)
+            );
+
+            const trend = data.prediction_trend || [];
+            const trendBody = $("predictionTrend");
+
+            if (trendBody) {
+                if (trend.length === 0) {
+                    trendBody.innerHTML =
+                        '<tr><td colspan="4">No predictions recorded yet.</td></tr>';
+                } else {
+                    trendBody.innerHTML = trend.map((item, index) => `
+                        <tr>
+                            <td>${item.index ?? index + 1}</td>
+                            <td>${item.timestamp || "—"}</td>
+                            <td>${item.category || "—"}</td>
+                            <td>${Number(item.prediction).toFixed(1)}</td>
+                        </tr>
+                    `).join("");
+                }
+            }
+
+            setText(
+                "analyticsMessage",
+                Number(data.total_predictions) > 0
+                    ? "Analytics updated successfully."
+                    : "Make a prediction to populate the analytics dashboard."
+            );
+
+            if (window.lucide) window.lucide.createIcons();
+
+        } catch (error) {
+            console.error("Analytics loading error:", error);
+
+            setText(
+                "analyticsMessage",
+                "Unable to load analytics. Check the Flask server and /analytics endpoint."
+            );
+
+            ["categoryChart", "studyChart", "attendanceChart",
+             "previousScoreChart"].forEach(id => {
+                const element = $(id);
+                if (element) {
+                    element.innerHTML =
+                        '<div class="analytics-message">Data could not be loaded.</div>';
+                }
+            });
+        }
+    }
+
+    const refreshButton = $("refreshAnalytics");
+    if (refreshButton) {
+        refreshButton.addEventListener("click", loadAnalytics);
+    }
+
+    loadAnalytics();
+
+    // Refresh the analytics after a new prediction is recorded.
+    const form = $("predictionForm");
+    if (form) {
+        form.addEventListener("submit", () => {
+            setTimeout(loadAnalytics, 1000);
+        });
+    }
+
+    const clearButton = $("clearHistoryBtn");
+    if (clearButton) {
+        clearButton.addEventListener("click", () => {
+            setTimeout(loadAnalytics, 500);
+        });
+    }
+});
+</script>
+
+</body>
+</html>

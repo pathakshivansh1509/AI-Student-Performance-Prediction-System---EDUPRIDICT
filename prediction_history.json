@@ -1,0 +1,88 @@
+{
+    "history": [
+        {
+            "prediction": 65.7,
+            "category": "GOOD",
+            "study_hours": 5.0,
+            "attendance": 77.9,
+            "previous_score": 60.0,
+            "assignment_score": 77.3,
+            "internal_score": 95.0,
+            "sleep_hours": 7.0,
+            "backlogs": 0.0,
+            "timestamp": "27 Oct 2026, 11:24 AM"
+        },
+        {
+            "prediction": 65.7,
+            "category": "GOOD",
+            "study_hours": 5.0,
+            "attendance": 77.9,
+            "previous_score": 60.0,
+            "assignment_score": 77.3,
+            "internal_score": 95.0,
+            "sleep_hours": 7.0,
+            "backlogs": 0.0,
+            "timestamp": "27 Oct 2026, 10:54 AM"
+        },
+        {
+            "prediction": 80.3,
+            "category": "EXCELLENT",
+            "study_hours": 3.0,
+            "attendance": 88.0,
+            "previous_score": 95.0,
+            "assignment_score": 98.0,
+            "internal_score": 94.0,
+            "sleep_hours": 6.0,
+            "backlogs": 0.0,
+            "timestamp": "26 Oct 2026, 01:05 PM"
+        },
+        {
+            "prediction": 70.8,
+            "category": "GOOD",
+            "study_hours": 5.0,
+            "attendance": 85.0,
+            "previous_score": 80.0,
+            "assignment_score": 80.0,
+            "internal_score": 50.0,
+            "sleep_hours": 2.3,
+            "backlogs": 0.0,
+            "timestamp": "14 Sep 2026, 02:50 PM"
+        },
+        {
+            "prediction": 59.4,
+            "category": "AVERAGE",
+            "study_hours": 2.0,
+            "attendance": 75.0,
+            "previous_score": 60.0,
+            "assignment_score": 50.0,
+            "internal_score": 50.0,
+            "sleep_hours": 10.0,
+            "backlogs": 0.0,
+            "timestamp": "12 Sep 2026, 06:22 PM"
+        },
+        {
+            "prediction": 86.3,
+            "category": "EXCELLENT",
+            "study_hours": 8.0,
+            "attendance": 93.0,
+            "previous_score": 81.0,
+            "assignment_score": 95.0,
+            "internal_score": 90.0,
+            "sleep_hours": 8.0,
+            "backlogs": 0,
+            "timestamp": "12 Sep 2026, 06:13 PM"
+        },
+        {
+            "prediction": 86.3,
+            "category": "EXCELLENT",
+            "study_hours": 8.0,
+            "attendance": 93.0,
+            "previous_score": 81.0,
+            "assignment_score": 95.0,
+            "internal_score": 90.0,
+            "sleep_hours": 8.0,
+            "backlogs": 0,
+            "timestamp": "12 Sep 2026, 06:10 PM"
+        }
+    ]
+}
